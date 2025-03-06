@@ -289,7 +289,7 @@ def chat():
     while True:
         user_input = input("\nYou: ").strip()
         
-        if user_input.lower() == "bye":
+        if user_input.lower() == "bye" or user_input.lower() == "i'm done" or user_input.lower() == "im done" or user_input.lower() == "nothing":
             print("Chatbot: Goodbye! Have a great day!")
             break
         
