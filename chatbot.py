@@ -259,7 +259,8 @@ def get_response(user_input):
     
     best_match = None
     best_match_score = 0
-    input_words = set(user_input_lower.split())
+    #input_words = set(user_input_lower.split())
+    input_words = set(re.split("\n|\f|\t| |-|_", user_input_lower))
     
     for key in responses:
         key_lower = key.lower()
@@ -288,7 +289,7 @@ def chat():
     while True:
         user_input = input("\nYou: ").strip()
         
-        if user_input.lower() == "bye":
+        if user_input.lower() == "bye" or user_input.lower() == "i'm done" or user_input.lower() == "im done" or user_input.lower() == "nothing":
             print("Chatbot: Goodbye! Have a great day!")
             break
         
