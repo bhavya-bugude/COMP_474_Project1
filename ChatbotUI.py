@@ -347,6 +347,7 @@ def chat():
                 # Handle Proper Keyword Response
                 response, doc_link = get_response(user_input)
                 st.session_state.conversation.append(":rainbow[**Chatbot**]: " + response) # display appropriate response from chatbot
+                print(f"Chatbot: {response}")
                 if doc_link:
                     st.session_state.last_doc_link = doc_link
                     st.session_state.conversation.append(":rainbow[**Chatbot**]: Would you like to know more about this topic? (Type 'yes' to view the documentation)")
