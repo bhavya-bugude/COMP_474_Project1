@@ -2,5 +2,5 @@
 Rule-Based Chatbot with NLP Integration.
 
 Sofia Valiante 40191897
-Bhavya Bugude
-Inas Fawzi
+<br> Bhavya Bugude
+<br> Inas Fawzi
