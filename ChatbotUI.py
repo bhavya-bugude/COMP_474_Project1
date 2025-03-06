@@ -321,6 +321,7 @@ def chat():
             user_input = user_input.strip() # trim user input
             if user_input:
                 st.session_state.conversation.append(f"**You**: {user_input}") # display user input
+                print(f"You: {user_input}")
 
                 # Exit
                 if user_input.lower() in ["bye", "goodbye", "finish", "end", "see you", "clear", "close", "i'm done", "im done", "quit", "nothing", "exit"]:
