@@ -259,7 +259,8 @@ def get_response(user_input):
     
     best_match = None
     best_match_score = 0
-    input_words = set(user_input_lower.split())
+    #input_words = set(user_input_lower.split())
+    input_words = set(re.split("\n|\f|\t| |-|_", user_input_lower))
     
     for key in responses:
         key_lower = key.lower()
