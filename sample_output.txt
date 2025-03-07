@@ -1,0 +1,30 @@
+Chatbot: Hello! I'm your Java programming assistant. How can I help you today?
+
+You: what is an if-else statement?
+Chatbot: An if-else statement provides an alternative block of code to execute when the condition is false.
+Chatbot: Would you like to know more about this topic? (Type 'yes' to view the documentation)
+
+You: yes
+Chatbot: Opening the documentation for you...
+Chatbot: What else would you like to know about Java?
+
+You: switch statements
+Chatbot: A switch statement in Java allows multi-way branching based on variable values.
+Chatbot: Would you like to know more about this topic? (Type 'yes' to view the documentation)
+
+You: no
+Chatbot: Alright! What else would you like to know about Java?
+
+You: tell me about the while loop
+Chatbot: A while loop executes a block of code as long as the condition remains true.
+Chatbot: Would you like to know more about this topic? (Type 'yes' to view the documentation)
+
+You: no
+Chatbot: Alright! What else would you like to know about Java?
+
+You: what about the do-while?
+Chatbot: A do-while loop executes at least once before checking the condition.
+Chatbot: Would you like to know more about this topic? (Type 'yes' to view the documentation)
+
+You: im done
+Chatbot: Goodbye! Have a great day!
