@@ -7,6 +7,6 @@ Rule-Based Chatbot with NLP Integration.
 <br> Sofia Valiante 40191897
 
 **Description:**
-The project has two formats to interact with the chatbot. 
+<br> The project has two formats to interact with the chatbot. 
 <br> One is through the console, which can be done by running the file chatbot.py, the other can be done through a UI interface on your browser which can be done by running the command `streamlit run ChatbotUI.py`
 
