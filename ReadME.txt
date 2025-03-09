@@ -31,14 +31,6 @@ HOW TO USE
 4. Type 'bye' to end the conversation and it clears the chat history and starts a new one
 
 RUNNING THE CHATBOT
-There are two ways to run the chatbot:
-
-1. Command Line Interface (chatbot.py)
-Run the following command in your terminal:
-   python chatbot.py
-This will start the command-line version of the chatbot where you can interact through the terminal.
-
-2. Graphical User Interface (ChatbotUI.py)
 Run the following command in your terminal:
    streamlit run ChatbotUI.py
 This will:

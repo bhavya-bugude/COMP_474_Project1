@@ -1,10 +1,32 @@
+########################################################
+# Team members:
+# Bhavya Bugude - 40270772
+# Inas Fawzi - 40208675
+# Sofia Valiante - 40191897
+########################################################
+
+########################################################
+# Step 1: Import Required Libraries
+########################################################
+
 import spacy
 import re
 import webbrowser
 
+########################################################
+# Step 2: Load NLP Model
+########################################################
+
+# Load English language model for NLP processing
 nlp = spacy.load("en_core_web_sm")
 
+########################################################
+# Step 3: Define Chatbot Responses
+########################################################
+
+# Dictionary containing all chatbot responses and their corresponding documentation links
 responses = {
+    # Basic interaction responses
     "greet": {
         "response": "Hello! How can I help you today?",
         "doc_link": None
@@ -221,13 +243,33 @@ responses = {
     }
 }
 
+########################################################
+# Step 4: Process User Input with NLP
+########################################################
+
 def preprocess_input(user_input):
+    """
+    Preprocesses user input using NLP techniques for better understanding and matching.
+    
+    This function performs several text processing steps:
+    1. Tokenization and lemmatization
+    2. Removal of stop words and punctuation
+    3. Generation of variations of words (plurals)
+    4. Creation of different word combinations
+    
+    Args:
+        user_input (str): The raw input string from the user
+        
+    Returns:
+        set: A set of processed tokens and their variations for matching
+    """
     doc = nlp(user_input.lower())
     tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
     processed_tokens = set()
     processed_tokens.add(user_input.lower())
     processed_tokens.add(" ".join(user_input.lower().split()))
     
+    # Process each token and add variations
     for token in doc:
         if not token.is_stop and not token.is_punct:
             processed_tokens.add(token.lemma_) 
@@ -236,10 +278,12 @@ def preprocess_input(user_input):
                 processed_tokens.add(token.lemma_ + "s")
                 processed_tokens.add(token.lemma_ + "es")
 
+    # Add the full phrase and individual tokens
     full_phrase = " ".join(tokens)
     processed_tokens.add(full_phrase)
     processed_tokens.update(tokens)
     
+    # Handle multi-word inputs
     words = user_input.lower().split()
     if len(words) > 1:
         processed_tokens.add(" ".join(reversed(words)))
@@ -249,17 +293,34 @@ def preprocess_input(user_input):
     return processed_tokens
 
 def get_response(user_input):
+    """
+    Determines the most appropriate response for the user's input using multiple matching strategies.
+    
+    The function uses three levels of matching:
+    1. Direct matching with processed tokens
+    2. Best partial match scoring
+    3. Word-level matching
+    
+    Args:
+        user_input (str): The processed input string from the user
+        
+    Returns:
+        tuple: (response_text, documentation_link) where:
+            - response_text (str): The chatbot's response
+            - documentation_link (str or None): URL to relevant documentation
+    """
     processed_tokens = preprocess_input(user_input)
     user_input_lower = user_input.lower()
     
+    # Direct matching
     for key in responses:
         key_lower = key.lower()
         if key_lower in processed_tokens or key_lower in user_input_lower:
             return responses[key]["response"], responses[key]["doc_link"]
     
+    # Best match scoring
     best_match = None
     best_match_score = 0
-    #input_words = set(user_input_lower.split())
     input_words = set(re.split("\n|\f|\t| |-|_", user_input_lower))
     
     for key in responses:
@@ -274,6 +335,7 @@ def get_response(user_input):
     if best_match:
         return responses[best_match]["response"], responses[best_match]["doc_link"]
     
+    # Word-level matching
     for key in responses:
         key_lower = key.lower()
         key_words = set(key_lower.split())
@@ -282,21 +344,40 @@ def get_response(user_input):
     
     return responses["default"]["response"], responses["default"]["doc_link"]
 
+########################################################
+# Step 5: Main Chat Interface: Command Line Interaction
+########################################################
+
 def chat():
+    """
+    Main chat loop that handles user interaction.
+    
+    This function:
+    1. Manages the conversation flow
+    2. Processes user input
+    3. Handles documentation link requests
+    4. Manages exit conditions
+    
+    The chat continues until the user indicates they want to exit using
+    commands like 'bye', 'i'm done', 'nothing', etc.
+    """
     print("Chatbot: Hello! I'm your Java programming assistant. How can I help you today?")
     last_doc_link = None
     
     while True:
         user_input = input("\nYou: ").strip()
         
-        if user_input.lower() == "bye" or user_input.lower() == "i'm done" or user_input.lower() == "im done" or user_input.lower() == "nothing":
+        # Handle exit conditions
+        if user_input.lower() in ["bye", "i'm done", "im done", "nothing"]:
             print("Chatbot: Goodbye! Have a great day!")
             break
         
+        # Handle empty input
         if not user_input:
             print("Chatbot: I didn't receive any input. Please ask me a question about Java programming!")
             continue
         
+        # Handle documentation link requests
         if user_input.lower() == "yes" and last_doc_link:
             print("Chatbot: Opening the documentation for you...")
             webbrowser.open(last_doc_link)
@@ -304,19 +385,26 @@ def chat():
             print("Chatbot: What else would you like to know about Java?")
             continue
             
+        # Handle negative response to documentation
         if user_input.lower() == "no" and last_doc_link:
             print("Chatbot: Alright! What else would you like to know about Java?")
             last_doc_link = None
             continue
             
+        # Process normal queries
         response, doc_link = get_response(user_input)
         print("Chatbot:", response)
         
+        # Offer documentation if available
         if doc_link:
             last_doc_link = doc_link
             print("Chatbot: Would you like to know more about this topic? (Type 'yes' to view the documentation)")
         else:
             last_doc_link = None
+
+########################################################
+# Step 6: Main Function to run the chatbot application
+########################################################
 
 if __name__ == "__main__":
     chat()
