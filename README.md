@@ -3,7 +3,7 @@ Rule-Based Chatbot with NLP Integration.
 
 **Team members:**
 <br> Bhavya Bugude
-<br> Inas Fawzi 
+<br> Inas Fawzi 40208675
 <br> Sofia Valiante 40191897
 
 **Description:**
