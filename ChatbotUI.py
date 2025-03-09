@@ -1,11 +1,21 @@
-# Library Imports
+########################################################
+# Step 1: Import Required Libraries
+########################################################
+
 import spacy
 import re
 import webbrowser
 import streamlit as st
 
-# Load English SpaCy
+########################################################
+# Step 2: Load NLP Model
+########################################################
+
 nlp = spacy.load("en_core_web_sm")
+
+########################################################
+# Step 3: Define Chatbot Responses
+########################################################
 
 responses = {
     "greet": {
@@ -13,6 +23,10 @@ responses = {
         "doc_link": None
     },
     "hello": {
+        "response": "Hello! How can I help you today?",
+        "doc_link": None
+    },
+    "hey": {
         "response": "Hello! How can I help you today?",
         "doc_link": None
     },
@@ -224,7 +238,20 @@ responses = {
     }
 }
 
+########################################################
+# Step 4: Process User Input with NLP
+########################################################
+
 def preprocess_input(user_input):
+    """
+    Preprocesses the user input by lemmatizing and removing stop words and punctuation.
+
+    Args:
+        user_input (str): The input string from the user.
+
+    Returns:
+        set: A set of processed tokens from the user input.
+    """
     doc = nlp(user_input.lower())
     tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
     processed_tokens = set() # remove tokens
@@ -257,6 +284,15 @@ def preprocess_input(user_input):
 
 
 def get_response(user_input):
+    """
+    Retrieves the appropriate response and documentation link based on user input.
+
+    Args:
+        user_input (str): The input string from the user.
+
+    Returns:
+        tuple: A tuple containing the response string and the documentation link.
+    """
     processed_tokens = preprocess_input(user_input)
     user_input_lower = user_input.lower()
 
@@ -291,20 +327,91 @@ def get_response(user_input):
     return responses["default"]["response"], responses["default"]["doc_link"]
 
 
+def handle_message(user_input):
+    """
+    Processes the user input, updates the conversation, and handles special commands like exit and documentation link opening.
+
+    Args:
+        user_input (str): The input string from the user.
+    """
+    if user_input:
+        st.session_state.conversation.append(f"**You**: {user_input}")
+        st.session_state.user_input = ""  # Clear the input
+
+        print(f"You: {user_input}")
+
+        # Exit
+        if user_input.lower() in ["bye", "goodbye", "finish", "end", "see you", "clear", "close", "i'm done", "im done", "quit", "nothing", "exit"]:
+            st.session_state.conversation.append(":rainbow[**Chatbot**]: You can always come back to ask me questions if you need. ✅")
+            print("Chatbot: Goodbye! Have a great day!")
+            st.session_state.clear()
+            return
+
+        # Open Doc Link
+        if user_input.lower() in ["yes", "yup", "yep", "sure", "ok", "okay"] and st.session_state.last_doc_link:
+            st.session_state.conversation.append(":rainbow[**Chatbot**]: Opening the documentation for you...")
+            print("Chatbot: Opening the documentation for you...")
+            webbrowser.open(st.session_state.last_doc_link)
+            st.session_state.last_doc_link = None
+            st.session_state.conversation.append(":rainbow[**Chatbot**]: What else would you like to know about Java?")
+            print("Chatbot: What else would you like to know about Java?")
+            return
+            
+
+        # Do Not Open Doc Link
+        if user_input.lower() in ["no", "nope", "nah"] and st.session_state.last_doc_link:
+            st.session_state.conversation.append(":rainbow[**Chatbot**]: Alright! What else would you like to know about Java?")
+            print("Chatbot: Alright! What else would you like to know about Java?")
+            st.session_state.last_doc_link = None
+            return
+
+        # Handle Proper Keyword Response
+        response, doc_link = get_response(user_input)
+        st.session_state.conversation.append(":rainbow[**Chatbot**]: " + response)
+        print(f"Chatbot: {response}")
+        if doc_link:
+            st.session_state.last_doc_link = doc_link
+            st.session_state.conversation.append(":rainbow[**Chatbot**]: Would you like to know more about this topic? (Type 'yes' to view the documentation)")
+            print("Chatbot: Would you like to know more about this topic? (Type 'yes' to view the documentation)")
+        else:
+            st.session_state.last_doc_link = None
+
+
+########################################################
+# Step 5: Streamlit Chat Interface: With loop for User Interaction
+########################################################
+
 def chat():
+    """
+    Initializes the Streamlit interface for the chatbot, manages session state, and handles user input.
+    """
     # Description
     st.title("Java Programming Assistant 🤖")
-    st.markdown("**Ask the Chatbot :rainbow[anything] about Java!**")
+    st.markdown("### :blue[Ask the Chatbot anything about Java!]")
+
+    # Add custom CSS for larger font size
+    st.markdown("""
+        <style>
+        .stTextInput input {
+            font-size: 1.1rem;
+        }
+        .stButton button {
+            font-size: 1.1rem;
+        }
+        div[data-testid="stMarkdownContainer"] {
+            font-size: 1.1rem;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
     # Add the Session State variables
-    # ... removes the need for a while loop to wait for user input and manages state
-    if 'conversation' not in st.session_state: # entire conversation history as list
+    if 'conversation' not in st.session_state:
         st.session_state.conversation = [":rainbow[Chatbot]: Hello! I'm your Java programming assistant. How can I help you today? 🙂"]
-    if 'last_doc_link' not in st.session_state: # doc links for responses
+    if 'last_doc_link' not in st.session_state:
         st.session_state.last_doc_link = None
-    if 'user_input' not in st.session_state: # user input
+    if 'user_input' not in st.session_state:
         st.session_state.user_input = ""
-    if 'remove_send_button' not in st.session_state: # control state of button upon exit of chat
+    if 'remove_send_button' not in st.session_state:
         st.session_state.remove_send_button = False
 
     # Display Entire Conversation
@@ -312,61 +419,39 @@ def chat():
         st.write(res)
 
     # Text Field for User Input
-    # ... sets value of state variable 'user_input'
-    user_input = st.text_input("Enter your question", placeholder="Type 'bye' to exit chat", value=st.session_state.user_input, key="user_input")
-
-    # Chat
-    if not st.session_state.remove_send_button: # display 'send' button when remove_send_button = false
-        if st.button("Send"):
-            user_input = user_input.strip() # trim user input
-            if user_input:
-                st.session_state.conversation.append(f"**You**: {user_input}") # display user input
-                print(f"You: {user_input}")
-
-                # Exit
-                if user_input.lower() in ["bye", "goodbye", "finish", "end", "see you", "clear", "close", "i'm done", "im done", "quit", "nothing", "exit"]:
-                    st.session_state.conversation.append(":rainbow[**Chatbot**]: You can always come back to ask me questions if you need. ✅")
-                    st.session_state.remove_send_button = True  # hide 'send' button to disallow further input
-                    print("Chatbot: Goodbye! Have a great day!")
-
-                # Open Doc Link
-                if user_input.lower() == "yes" and st.session_state.last_doc_link:
-                    st.session_state.conversation.append(":rainbow[**Chatbot**]: Opening the documentation for you...")
-                    print("Chatbot: Opening the documentation for you...")
-                    webbrowser.open(st.session_state.last_doc_link)  # takes you to that respective doc link (that matches the response)
-                    st.session_state.last_doc_link = None
-                    st.session_state.conversation.append(":rainbow[**Chatbot**]: What else would you like to know about Java?")
-                    print("Chatbot: What else would you like to know about Java?")
-
-                # Do Not Open Doc Link
-                if user_input.lower() == "no" and st.session_state.last_doc_link:
-                    st.session_state.conversation.append(":rainbow[**Chatbot**]: Alright! What else would you like to know about Java?")
-                    print("Chatbot: Alright! What else would you like to know about Java?")
-                    st.session_state.last_doc_link = None
-
-                # Handle Proper Keyword Response
-                response, doc_link = get_response(user_input)
-                st.session_state.conversation.append(":rainbow[**Chatbot**]: " + response) # display appropriate response from chatbot
-                print(f"Chatbot: {response}")
-                if doc_link:
-                    st.session_state.last_doc_link = doc_link
-                    st.session_state.conversation.append(":rainbow[**Chatbot**]: Would you like to know more about this topic? (Type 'yes' to view the documentation)")
-                    print("Chatbot: Would you like to know more about this topic? (Type 'yes' to view the documentation)")
-                else:
-                    st.session_state.last_doc_link = None
-
-                # Update UI
-                st.rerun()
+    if not st.session_state.remove_send_button:
+        # Create container for input and button
+        input_container = st.container()
+        with input_container:
+            # Handle Enter key submission
+            user_input = st.text_input(
+                "Enter your response",
+                placeholder="Type 'bye' to exit chat",
+                key="user_input",
+                label_visibility="visible",
+                on_change=lambda: handle_message(st.session_state.user_input.strip()) if st.session_state.user_input.strip() else None
+            )
+            
+            # Left-align the send button
+            col1, col2 = st.columns([1, 5])
+            with col1:
+                # Handle button click
+                if st.button("Send", use_container_width=True):
+                    if st.session_state.user_input.strip():
+                        st.session_state.user_input = "" 
+                        st.rerun()
 
     # Restart Chatbot
     if st.session_state.remove_send_button is True:
-         if st.button("Restart Chatbot", type="primary"):
-            st.session_state.clear() # clear conversation history
-            st.session_state.remove_send_button = False # start the (chat) if not st.session_state.remove_send_button... again
-            st.rerun() # UI update
+        if st.button("Restart Chatbot", type="primary"):
+            st.session_state.clear()
+            st.session_state.remove_send_button = False
+            st.rerun()
 
 
-# MAIN
-# ... run chatbot
+########################################################
+# Step 6: Main Function to run the chatbot application
+########################################################
+
 if __name__ == "__main__":
     chat()
