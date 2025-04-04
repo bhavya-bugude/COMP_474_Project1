@@ -52,7 +52,8 @@ python chatbot.py
 This will start the command-line version of the chatbot where you can interact through the terminal.
 
 ### Graphical User Interface (ChatbotUI.py)
-Run the following command in your terminal:
+To run this version of program, please create a virtual environment and install the requirements.txt files.
+Then run the following command in your terminal:
 ```bash
 streamlit run ChatbotUI.py
 ```
